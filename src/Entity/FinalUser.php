@@ -2,11 +2,18 @@
 
 namespace App\Entity;
 
-use App\Repository\FinalUserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\FinalUserRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * @ORM\Entity(repositoryClass=FinalUserRepository::class)
+ * @UniqueEntity("email", message="this mail already exists.")
+ * 
  */
 class FinalUser
 {
@@ -14,31 +21,42 @@ class FinalUser
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("finalUser:read")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="email", type="string", length=255)
+     * @Groups("finalUser:read")
+     * @NotBlank
+     *  
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
+     * 
      */
     private $password;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("finalUser:read")
+     * 
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("finalUser:read")
+     * 
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="datetime_immutable")
+     * @Groups("finalUser:read")
      */
     private $createdAt;
 
