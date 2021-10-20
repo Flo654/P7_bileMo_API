@@ -6,6 +6,8 @@ security:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
         App\Entity\User:
             algorithm: auto
+        App\Entity\FinalUser:
+            algorithm: auto
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
@@ -14,6 +16,8 @@ security:
             entity:
                 class: App\Entity\User
                 property: email
+        
+        
     firewalls:
         login:
             pattern: ^/api/login

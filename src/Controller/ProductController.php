@@ -2,31 +2,31 @@
 
 namespace App\Controller;
 
+use App\Entity\Product;
 use OpenApi\Annotations\Tag;
 use OpenApi\Annotations as OA;
 use OpenApi\Annotations\Items;
 use OpenApi\Annotations\Schema;
-use OpenApi\Annotations\Property;
-use OpenApi\Annotations\Parameter;
-use OpenApi\Annotations\JsonContent;
 use App\Repository\ProductRepository;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @Route("/api")
  * 
  * @Security(name="Bearer")
  * @OA\Tag(name="Products")
+ * 
  */
 class ProductController extends AbstractController
 {
     private $productRepository;
+    
 
     public function __construct(ProductRepository $productRepository)
     {
@@ -34,18 +34,26 @@ class ProductController extends AbstractController
     }    
     
     /**
+     * List of all products 
+     * 
      * @Route("/products", name="product-list", methods={"GET"})
      * 
      * @OA\Response(
      *     response=200,
      *     description="Returns the list of all available products",
      *     @OA\JsonContent(type="array", @OA\Items(ref=@Model(type=Product::class)))
-     * ) 
+     * )     
      */
-    public function getAll(): Response
+    public function getAll(CacheInterface $cacheInterface): Response
     {
-        return $this->json($this->productRepository->findAll(), 200);
+        $productsInCache = $cacheInterface->get('productList',function (ItemInterface $item){
+            $item->expiresAfter(30);
+            return $this->productRepository->findAll();
+        });
+        
+        return $this->json($productsInCache, 200);
     }
+
 
     /**
      * Details of one product by id
@@ -73,13 +81,16 @@ class ProductController extends AbstractController
      *     )     *     
      * )
      */
-    public function getOne($id): Response
+    public function getOne($id, CacheInterface $cacheInterface): Response
     {
         $product = $this->productRepository->find($id);
         if(!$product){
             return $this->json("this product does not exist", 404);
         }
-        return $this->json($product, 200);
+        $productInCache = $cacheInterface->get('productdetails'. $id,function (ItemInterface $item) use($product){
+            $item->expiresAfter(300);
+            return $product;
+        });
+        return $this->json($productInCache, 200);
     }
 }
-

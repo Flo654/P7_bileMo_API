@@ -8,8 +8,10 @@ use OpenApi\Annotations as OA;
 use OpenApi\Annotations\Items;
 use OpenApi\Annotations\Schema;
 use OpenApi\Annotations\Property;
+use OpenApi\Annotations\MediaType;
 use OpenApi\Annotations\Parameter;
 use OpenApi\Annotations\JsonContent;
+use OpenApi\Annotations\RequestBody;
 use App\Repository\FinalUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -109,7 +111,37 @@ class UserController extends AbstractController
      * 
      * @Route("/users", name="user-create", methods={"POST"})
      * 
-     * 
+     * @OA\RequestBody(
+     *     description="The new user to create",
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="application/Json",
+     *         @OA\Schema(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="email",
+     *                 description="User's email address",
+     *                 type="string"
+     *             ),
+     *             @OA\Property(
+     *                 property="password",
+     *                 description="FinalUser's password",
+     *                 type="string"
+     *             ),
+     *             @OA\Property(
+     *                 property="first_name",
+     *                 description="finalUser's first name",
+     *                 type="string"
+     *             ),
+     *             @OA\Property(
+     *                 property="last_name",
+     *                 description="finalUser's last name",
+     *                 type="string"
+     *             )
+     *             
+     *         )
+     *     )
+     * )
      * @OA\Response(
      *     response=201,
      *     description="Returns the created FinalUser",
@@ -149,7 +181,32 @@ class UserController extends AbstractController
     }
     
     /**
+     * delete an user's finalUser
+     * 
      * @Route("/users/{id}", name="user-delete", methods={"DELETE"})
+     * 
+     * @OA\Parameter(
+     *     name="id",
+     *     in="path",
+     *     description="FinalUser ID",
+     *     required=true,
+     *     @OA\Schema(type="integer")
+     * ),
+     * @OA\Response(
+     *     response=204,
+     *     description="delete finalUser",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="You have deleted this user" ))
+     * ),
+     * @OA\Response(
+     *     response=404,
+     *     description="This user does not exist",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="this user does not exist" ))   
+     * ),
+     * @OA\Response(
+     *     response=403,
+     *     description="You cannot delete this user",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="You cannot access this user" ))   
+     * ),
      *
      */
     public function delete($id, EntityManagerInterface $entityManager)
