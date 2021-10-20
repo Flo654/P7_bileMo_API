@@ -53,7 +53,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $createdAt;
 
     /**
-     * @ORM\OneToMany(targetEntity=FinalUser::class, mappedBy="user")
+     * @ORM\OneToMany(targetEntity=FinalUser::class, mappedBy="user",cascade={"remove"})
      */
     private $finalUsers;
 
