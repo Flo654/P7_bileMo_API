@@ -80,11 +80,25 @@ Start the server
 ```
 
   
+## Test the API 
+
+You can test the API in Postman with these credentials:
+
+```bash
+  username : test@test.com
+  password : test
+```
+
+You can also test the API directly in HTML interactive documentation:
+
+```bash
+  GET /api/doc
+```
 ## Documentation
 
 [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle)
 
-  
+[Postman](https://www.postman.com/)
 ## API Documentation
 
 #### Html interactive documentation
