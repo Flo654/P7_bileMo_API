@@ -4,8 +4,16 @@ namespace App\Controller;
 
 use DateTimeImmutable;
 use App\Entity\FinalUser;
+use OpenApi\Annotations as OA;
+use OpenApi\Annotations\Items;
+use OpenApi\Annotations\Schema;
+use OpenApi\Annotations\Property;
+use OpenApi\Annotations\Parameter;
+use OpenApi\Annotations\JsonContent;
 use App\Repository\FinalUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,6 +26,8 @@ use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 /**
  * @Route("/api")
  * 
+ * @Security(name="Bearer")
+ * @OA\Tag(name="Users")
  */
 class UserController extends AbstractController
 {
@@ -35,6 +45,11 @@ class UserController extends AbstractController
      * 
      * @Route("/users", name="user-list", methods={"GET"})
      * 
+     * @OA\Response(
+     *     response=200,
+     *     description="Returns the list of all finalUsers's user",
+     *     @OA\JsonContent(type="array", @OA\Items(ref=@Model(type=FinalUser::class, groups={"finalUser:read"})))
+     * )
      */
     public function getAll(): Response
     {
@@ -50,6 +65,29 @@ class UserController extends AbstractController
      * 
      * @Route("/users/{id}", name="user-detail", methods={"GET"})
      * 
+     * @OA\Parameter(
+     *     name="id",
+     *     in="path",
+     *     description="FinalUser ID",
+     *     required=true,
+     *     @OA\Schema(type="integer")
+     * ),
+     * @OA\Response(
+     *     response=200,
+     *     description="details finalUsers's user",
+     *     @OA\JsonContent(ref=@Model(type=FinalUser::class, groups={"finalUser:read"}))
+     * ),
+     * @OA\Response(
+     *     response=404,
+     *     description="This user does not exist",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="this user does not exist" ))   
+     * ),
+     * @OA\Response(
+     *     response=403,
+     *     description="You cannot access this user",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="You cannot access this user" ))   
+     * ),
+     *
      * @return Response
      */
     public function getOne($id): Response
@@ -70,6 +108,18 @@ class UserController extends AbstractController
      * Create a FinalUser
      * 
      * @Route("/users", name="user-create", methods={"POST"})
+     * 
+     * 
+     * @OA\Response(
+     *     response=201,
+     *     description="Returns the created FinalUser",
+     *     @OA\JsonContent(ref=@Model(type=FinalUser::class, groups={"finalUser:read"}))
+     * ),
+     * @OA\Response(
+     *     response=400,
+     *     description="bad request",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="bad request" ))   
+     * ),
      * 
      */
     public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validatorInterface)
