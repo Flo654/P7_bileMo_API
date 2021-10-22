@@ -27,6 +27,8 @@ Go to the project directory
   cd my-project
 ```
 
+:warning: Go to .env.example and remove the .example extension
+
 Install dependencies
 
 ```bash
