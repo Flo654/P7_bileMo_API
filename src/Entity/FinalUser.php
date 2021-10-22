@@ -44,7 +44,7 @@ class FinalUser implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="json")
-     * @Groups("finalUser:read")
+     * 
      */
     private $roles = [];
 
