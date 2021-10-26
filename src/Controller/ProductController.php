@@ -9,12 +9,14 @@ use OpenApi\Annotations\Items;
 use OpenApi\Annotations\Schema;
 use App\Repository\ProductRepository;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Symfony\Contracts\Cache\ItemInterface;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Contracts\Cache\CacheInterface;
 use Nelmio\ApiDocBundle\Annotation\Security;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @Route("/api")
@@ -42,13 +44,24 @@ class ProductController extends AbstractController
      *     response=200,
      *     description="Returns the list of all available products",
      *     @OA\JsonContent(type="array", @OA\Items(ref=@Model(type=Product::class)))
-     * )     
+     * )
+     * @OA\Parameter(
+     *     name="page",
+     *     in="query",
+     *     description="The page number",
+     *     @OA\Schema(type="int", default = "1")
+     * )        
      */
-    public function getAll(CacheInterface $cacheInterface): Response
+    public function getAll(CacheInterface $cacheInterface, Request $request, PaginatorInterface $paginatorInterface): Response
     {
-        $productsInCache = $cacheInterface->get('productList',function (ItemInterface $item){
+        $products = $paginatorInterface->paginate(
+            $this->productRepository->findAll(),
+            $request->query->getInt('page', 1),5 //affiche 5 produits par page
+        );   
+
+        $productsInCache = $cacheInterface->get('productList',function (ItemInterface $item)use($products){
             $item->expiresAfter(30);
-            return $this->productRepository->findAll();
+            return $products;
         });
         
         return $this->json($productsInCache, 200);

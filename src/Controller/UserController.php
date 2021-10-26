@@ -15,6 +15,7 @@ use OpenApi\Annotations\RequestBody;
 use App\Repository\FinalUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Knp\Component\Pager\PaginatorInterface;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -52,14 +53,24 @@ class UserController extends AbstractController
      *     description="Returns the list of all finalUsers's user",
      *     @OA\JsonContent(type="array", @OA\Items(ref=@Model(type=FinalUser::class, groups={"finalUser:read"})))
      * )
+     * @OA\Parameter(
+     *     name="page",
+     *     in="query",
+     *     description="The page number",
+     *     @OA\Schema(type="int", default = "1")
+     * )
      */
-    public function getAll(): Response
+    public function getAll(Request $request, PaginatorInterface $paginatorInterface): Response
     {
         $finalUserList = $this->finalUserRepository->findBy(['user' => $this->getUser()->getId()]);      
         if ($finalUserList === []){
             return $this->json("you don't have any users yet", 404);
         }
-        return $this->json($finalUserList, 200, [], ['groups' => 'finalUser:read']);
+        $finalUserListPaginated = $paginatorInterface->paginate(
+            $finalUserList,
+            $request->query->getInt('page', 1), 2 //affiche 2 users par page
+        );
+        return $this->json($finalUserListPaginated, 200, [], ['groups' => 'finalUser:read']);
     }
 
     /**
